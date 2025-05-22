@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    // this function  is for login
+    // this function  is for login//
     public function login()
     {
         return"test login";
