@@ -14,7 +14,7 @@ services:
       - example_app_network
     volumes:
       - .:/var/www/html
-      - vendor_example_volume:/var/www/html/vendor
+      #- vendor_example_volume:/var/www/html/vendor
     environment:
       APP_NAME: example
       APP_KEY: ${APP_KEY}

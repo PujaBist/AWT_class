@@ -4,39 +4,49 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Validation\ValidationException;
+use Hash;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // this function  is for login//
-    public function login()
+     public function login(Request $request)
     {
-        return"test login";
-    }
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'email' => 'Invalid credentials'
+            ]);
+        }
+        if (!Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => 'Invalid credentials'
+            ]);
+        }
+
+        $token = $user->createToken('api-token')->plainTextToken;
+        return response()->json([
+            'token' => $token,
+            'user' => [
+                'name'=>$user->name,
+                'email'=>$user->email,
+            ]
+        ]);
+    }
 
     public function register(Request $request)
     {
-        $request->validate([
-            'name' =>'required|min:1|max:255',
-            'email' => 'required|email',
-            'password'=>'required',
-        ]);
-        $existingUser=User :: where('email',$request ->email)->exists();
-        if($existingUser){
-            throw ValidationException::withMessages([
-                'email' => 'Email already in use'
-            ]);
-        }
-        # create accept array
-       User::create($request->all());   
-     #  response() is aglobal function 
-       return response () ->json ([
-        'message' => 'User created successfully!'
-       ]) ; #return $request->all();  #-> is used in php
+        return response()->json(['message' => 'Register works']);
     }
 
-
-
+    public function getProfile()
+    {
+        return response()->json(['message' => 'Your profile info']);
+    }
 }
