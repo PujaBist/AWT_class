@@ -3,14 +3,60 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\UserCreated;
+use App\Models\Otp;
 use App\Models\User;
 use Hash;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Mail;
 
 class AuthController extends Controller
 {
-     public function login(Request $request)
+
+
+    
+
+
+
+    // This function is for registering a new user/
+
+    public function register(Request $request)
+    {
+
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        
+        
+        $existingUser = User::where('email', $request->email)->first();
+
+        if ($existingUser) {
+            throw ValidationException::withMessages([
+                'email' => 'Email already in use'
+            ]);
+        }
+
+       
+       
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+        
+        
+
+        return response()->json([
+            'message' => 'User created successfully',
+            'user' => $user,
+        ]);
+    }
+    public function login(Request $request)
     {
         $request->validate([
             'email' => 'required|email',
@@ -39,14 +85,28 @@ class AuthController extends Controller
             ]
         ]);
     }
-
-    public function register(Request $request)
+    public function logout(Request $request)
     {
-        return response()->json(['message' => 'Register works']);
+        $request->user()->tokens()->delete();
+        return response()->json([
+            'message' => 'Logged out successfully'
+        ]);
+    }
+    public function getProfile(Request $request)
+    {
+
+        return "hello";
+
     }
 
-    public function getProfile()
-    {
-        return response()->json(['message' => 'Your profile info']);
+
+    
+
+    public function getUserDetails(){
+
+        return response()->json([
+            'user' => auth()->user()
+        ]);
     }
+
 }
